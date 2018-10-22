@@ -34,7 +34,7 @@ SQL Server 2017 is supported on Red Hat Enterprise Linux (RHEL), SUSE Linux Ente
 |-----|-----|-----
 | **Red Hat Enterprise Linux** | 7.3 or 7.4 | [Get RHEL 7.4](http://access.redhat.com/products/red-hat-enterprise-linux/evaluation)
 | **SUSE Linux Enterprise Server** | v12 SP2 | [Get SLES v12 SP2](https://www.suse.com/products/server)
-| **Ubuntu** | 16.04 | [Get Ubuntu 16.04](http://www.ubuntu.com/download/server)
+| **Ubuntu** | 16.04 | [Get Ubuntu 16.04](http://releases.ubuntu.com/16.04/)
 | **Docker Engine** | 1.8+ | [Get Docker](http://www.docker.com/products/overview)
 
 Microsoft also supports deploying and managing SQL Server containers by using OpenShift and Kubernetes.
