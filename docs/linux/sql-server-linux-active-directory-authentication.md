@@ -36,11 +36,12 @@ This tutorial consists of the following tasks:
 Before you configure AD Authentication, you need to:
 
 * Set up an AD Domain Controller (Windows) on your network  
+* Obtain the hostname of the Linux server (from the command line, the hostname command) and insure that is resolvable from any of the domain controllers, either by adding it statically in DNS or by putting it in a hosts files entry.
 * Install [!INCLUDE[ssNoVersion](../includes/ssnoversion-md.md)]
   * [Red Hat Enterprise Linux](quickstart-install-connect-red-hat.md)
   * [SUSE Linux Enterprise Server](quickstart-install-connect-suse.md)
   * [Ubuntu](quickstart-install-connect-ubuntu.md)
-
+  
 ## <a id="join"></a> Join [!INCLUDE[ssNoVersion](../includes/ssnoversion-md.md)] host to AD domain
 
 Use the following steps to join a [!INCLUDE[ssNoVersion](../includes/ssnoversion-md.md)] host to an Active Directory domain:
@@ -49,7 +50,7 @@ Use the following steps to join a [!INCLUDE[ssNoVersion](../includes/ssnoversion
 
    ```bash
    # RHEL
-   sudo yum install realmd krb5-workstation
+   sudo yum install realmd krb5-workstation sssd samba-tools-common
 
    # SUSE
    sudo zypper install realmd krb5-client
@@ -66,9 +67,11 @@ Use the following steps to join a [!INCLUDE[ssNoVersion](../includes/ssnoversion
 1. Configure your [!INCLUDE[ssNoVersion](../includes/ssnoversion-md.md)] host machine to use your AD domain controller's IP address as a DNS nameserver. 
 
    - **Ubuntu**:
-
-      Edit the `/etc/network/interfaces` file so that your AD domain controller's IP address is listed as a dns-nameserver. For example: 
-
+         Edit your `/etc/resolv.conf` file so that it contains a nameserver entry with the IP address of one of your domain controllers:
+      ```/etc/resolv.conf
+      nameserver **<AD domain controller IP address>**
+      ```
+      Edit `/etc/network/interfaces` and remove any entries related to DNS that might look like so:
       ```/etc/network/interfaces
       <...>
       # The primary network interface
@@ -87,32 +90,23 @@ Use the following steps to join a [!INCLUDE[ssNoVersion](../includes/ssnoversion
       sudo ifdown eth0 && sudo ifup eth0
       ```
 
-      Now check that your `/etc/resolv.conf` file contains a line like the following example:  
-
-      ```/etc/resolv.conf
-      nameserver **<AD domain controller IP address>**
-      ```
-
    - **RHEL**:
 
-     Edit the `/etc/sysconfig/network-scripts/ifcfg-eth0` file (or other interface config file as appropriate) so that your AD domain controller's IP address is listed as a DNS server:
+     Edit your `/etc/resolv.conf` file so that it contains a nameserver entry with the IP address of one of your domain controllers:
+     ```/etc/resolv.conf
+     nameserver **<AD domain controller IP address>**
+     ```
+     Edit `/etc/sysconfig/network-scripts/ifcfg-eth0` file (or other interface config file as appropriate) and remove any entries related to dns like so:
 
      ```/etc/sysconfig/network-scripts/ifcfg-eth0
      <...>
-     PEERDNS=no
+     PEERDNS=yes
      DNS1=**<AD domain controller IP address>**
      ```
-
-     After editing this file, restart the network service:
+    If changes had to be made restart the network:
 
      ```bash
      sudo systemctl restart network
-     ```
-
-     Now check that your `/etc/resolv.conf` file contains a line like the following example:  
-
-     ```/etc/resolv.conf
-     nameserver **<AD domain controller IP address>**
      ```
 
    - **SLES**:
@@ -210,6 +204,7 @@ For more information, see the Red Hat documentation for [Discovering and Joining
    > If you receive an error, "Insufficient access rights," then you need to check with a domain administrator that you have sufficient permissions to set an SPN on this account.
    >
    > If you change the TCP port in the future, then you need to run the setspn command again with the new port number. You also need to add the new SPN to the SQL Server service keytab by following the steps in the next section.
+   > The domain controller that you run setspn on will need to be able to resolve the hostname of the Linux server you're setting up active directory on. This can either be set in DNS statically, or a hosts file on the domain controller
 
 3. For more information, see [Register a Service Principal Name for Kerberos Connections](../database-engine/configure-windows/register-a-service-principal-name-for-kerberos-connections.md).
 
@@ -255,7 +250,7 @@ For more information, see the Red Hat documentation for [Discovering and Joining
    ktutil: list
 
    # Delete all entries by their slot number which are not the UPN one at a
-   # time.
+   # time. These would be all the entries with host/ at the beginning of the record.
    # Warning: when an entry is deleted (e.g. slot 1), all values slide up by
    # one to take its place (e.g. the entry in slot 2 moves to slot 1 when slot
    # 1's entry is deleted)
