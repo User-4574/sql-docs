@@ -326,7 +326,8 @@ GO
 ALTER AUTHORIZATION ON ENDPOINT::CantabSalesServer1 TO JaePak;    
 GO    
 ```    
-    
+Note:Changing ownership of an endpoint will drop any existing permissions present on that endpoint.
+
 ### E. Changing the owner of a table    
  Each of the following examples changes the owner of the `Sprockets` table in the `Parts` database to the database user `MichikoOsada`.    
 ```    
